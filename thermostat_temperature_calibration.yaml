@@ -1,0 +1,72 @@
+blueprint:
+  name: Tuya thermostat temperature calibration
+  description: Ensure the Tuya thermostat has the temperature of a separate sensor.
+  domain: automation
+  input:
+    source_temp_sensor:
+      name: Source Temperature sensor
+      description: This sensor will be used as the source.
+      selector:
+        entity:
+          domain: sensor
+          device_class: temperature
+    target_thermostat:
+      name: Thermostat
+      description: The Tuya thermostat to adjust the calibration.
+      selector:
+        entity:
+          domain: climate
+    target_thermostat_temp_calibration:
+      name: Thermostat temperature calibration
+      description: The Tuya thermostat temperature calibration.
+      selector:
+        entity:
+          domain: number
+
+variables:
+  target_thermostat: !input target_thermostat
+  source_temp_sensor: !input source_temp_sensor
+  target_thermostat_temp_calibration: !input target_thermostat_temp_calibration
+  thermostat_temp: "{{ state_attr(target_thermostat, 'local_temperature') | float }}"
+  current_offset: "{{ state_attr(target_thermostat, 'local_temperature_calibration') }}"
+  actual_temp: "{{ states(source_temp_sensor) | float }}"
+  offset: "{{ ( actual_temp - thermostat_temp ) | round }}"
+  calculated_offset: "{{ ( ( actual_temp - thermostat_temp ) + current_offset ) | round }}"
+
+trigger:
+- platform: state
+  entity_id: !input target_thermostat
+  attribute: local_temperature
+- platform: state
+  entity_id: !input source_temp_sensor 
+
+condition:
+- condition: template
+  value_template: "{{ offset != 0 }}"
+
+action:
+- service: system_log.write
+  data:
+    message: >
+      {{ target_thermostat }} has temp difference of {{ offset }}. Setting offset to {{ calculated_offset }}
+    level: info
+    logger: blueprints.thermostat.offset
+- service: system_log.write
+  data:
+    message: >
+      target: {{ target_thermostat }} 
+      source: {{ source_temp_sensor }}
+      temp difference: {{ offset }}
+      actual_temp: {{ actual_temp }}
+      thermostat_temp: {{ thermostat_temp }}
+      current_offset: {{ current_offset }}
+      calculated_offset: {{ calculated_offset }}
+    level: debug
+    logger: blueprints.thermostat.offset
+- service: number.set_value
+  data:
+    value: "{{ calculated_offset }}"
+  target:
+    entity_id: "{{ target_thermostat_temp_calibration }}"
+
+mode: single
