@@ -30,8 +30,8 @@ variables:
   thermostat_temp: "{{ state_attr(target_thermostat, 'local_temperature') | float(999) }}"
   current_offset: "{{ state_attr(target_thermostat, 'local_temperature_calibration') }}"
   actual_temp: "{{ states(source_temp_sensor) | float(999) }}"
-  offset: "{{ ( actual_temp - thermostat_temp ) | round(1, 'floor') }}"
-  calculated_offset: "{{ ( ( actual_temp - thermostat_temp ) + current_offset ) | round(1, 'floor') }}"
+  offset: "{{ ( ( actual_temp - thermostat_temp ) * 2 ) | round(0, 'floor') / 2 }}"
+  calculated_offset: "{{ ( ( ( actual_temp - thermostat_temp ) + current_offset ) * 2 ) | round(0, 'floor') / 2 }}"
   calculated_offset_safe: "{{ 0.0 if (calculated_offset <= -8.0 or calculated_offset >= 8.0) else calculated_offset }}"
 
 trigger:
