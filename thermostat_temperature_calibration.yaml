@@ -49,7 +49,7 @@ action:
 - service: system_log.write
   data:
     message: >
-      {{ target_thermostat }} has temp difference of {{ offset }}. Setting offset to {{ calculated_offset }}
+      {{ target_thermostat }} has temp difference of {{ offset }}. Setting offset to {{ calculated_offset_safe }}
     level: info
     logger: blueprints.thermostat.offset
 - service: system_log.write
