@@ -34,12 +34,17 @@ variables:
   calculated_offset: "{{ ( ( ( actual_temp - thermostat_temp ) + current_offset ) * 2 ) | round(0, 'floor') / 2 }}"
   calculated_offset_safe: "{{ 0.0 if (calculated_offset <= -8.0 or calculated_offset >= 8.0) else calculated_offset }}"
 
+#trigger:
+#- platform: state
+#  entity_id: !input target_thermostat
+#  attribute: local_temperature
+#- platform: state
+#  entity_id: !input source_temp_sensor
+
 trigger:
-- platform: state
-  entity_id: !input target_thermostat
-  attribute: local_temperature
-- platform: state
-  entity_id: !input source_temp_sensor 
+- platform: time_pattern
+  # Trigger every 15 minutes
+  minutes: "/15"
 
 condition:
 - condition: template
