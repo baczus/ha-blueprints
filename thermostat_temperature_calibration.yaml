@@ -27,8 +27,8 @@ variables:
   target_thermostat: !input target_thermostat
   source_temp_sensor: !input source_temp_sensor
   target_thermostat_temp_calibration: !input target_thermostat_temp_calibration
-  thermostat_temp: "{{ state_attr(target_thermostat, 'local_temperature') | float(999) }}"
-  current_offset: "{{ state_attr(target_thermostat, 'local_temperature_calibration') }}"
+  thermostat_temp: "{{ state_attr(target_thermostat, 'current_temperature') | float(999) }}"
+  current_offset: "{{ states(target_thermostat_temp_calibration) }}"
   actual_temp: "{{ states(source_temp_sensor) | float(999) }}"
   offset: "{{ ( ( actual_temp - thermostat_temp ) * 2 ) | round(0, 'floor') / 2 }}"
   calculated_offset: "{{ ( ( ( actual_temp - thermostat_temp ) + current_offset ) * 2 ) | round(0, 'floor') / 2 }}"
@@ -48,7 +48,8 @@ trigger:
 
 condition:
 - condition: template
-  value_template: "{{ offset != 0 and thermostat_temp != 999 and actual_temp != 999 }}"
+  #value_template: "{{ offset != 0 and thermostat_temp != 999 and actual_temp != 999 }}"
+  value_template: "{{ thermostat_temp != 999 and actual_temp != 999 }}"
 
 action:
 - service: system_log.write
