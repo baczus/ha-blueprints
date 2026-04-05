@@ -32,7 +32,8 @@ variables:
   actual_temp: "{{ states(source_temp_sensor) | float(999) }}"
   offset: "{{ ( ( actual_temp - thermostat_temp ) * 2 ) | round(0, 'floor') / 2 }}"
   calculated_offset: "{{ ( ( ( actual_temp - thermostat_temp ) + current_offset ) * 2 ) | round(0, 'floor') / 2 }}"
-  calculated_offset_safe: "{{ 0.0 if (calculated_offset <= -8.0 or calculated_offset >= 8.0) else calculated_offset }}"
+  #calculated_offset_safe: "{{ 0.0 if (calculated_offset <= -8.0 or calculated_offset >= 8.0) else calculated_offset }}"
+  calculated_offset_safe: "{{ current_offset if calculated_offset <= -8 or calculated_offset >= 8 else calculated_offset }}"
 
 #trigger:
 #- platform: state
