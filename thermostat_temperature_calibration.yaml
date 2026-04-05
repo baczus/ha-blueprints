@@ -28,7 +28,7 @@ variables:
   source_temp_sensor: !input source_temp_sensor
   target_thermostat_temp_calibration: !input target_thermostat_temp_calibration
   thermostat_temp: "{{ state_attr(target_thermostat, 'current_temperature') | float(999) }}"
-  current_offset: "{{ states(target_thermostat_temp_calibration) }}"
+  current_offset: "{{ states(target_thermostat_temp_calibration) | float(0) }}"
   actual_temp: "{{ states(source_temp_sensor) | float(999) }}"
   offset: "{{ ( ( actual_temp - thermostat_temp ) * 2 ) | round(0, 'floor') / 2 }}"
   calculated_offset: "{{ ( ( ( actual_temp - thermostat_temp ) + current_offset ) * 2 ) | round(0, 'floor') / 2 }}"
